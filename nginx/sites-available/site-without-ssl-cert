@@ -1,0 +1,13 @@
+server {
+    listen server:80;
+    server_name domain.tld www.domain.tld;
+    root /var/www/tld.domain/www;
+    index index.html;
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    location ~ /.well-known {
+        allow all;
+    }
+}
+
