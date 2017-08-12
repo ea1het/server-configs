@@ -1,0 +1,10 @@
+
+server {
+	listen devserver:80;
+	server_name api.domain.tld;
+
+        location / {
+       	    include uwsgi_params;
+            uwsgi_pass unix:/opt/api/run/server.sock;
+    	}
+}
