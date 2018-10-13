@@ -8,4 +8,4 @@
 #
 
 # min	hour	day	month	weekday	command
-0       0       1   *       *       root /usr/local/bin/update-certs.sh && rc-service haproxy restart
+  0   0     1   *     *       root /usr/local/bin/update-certs.sh && rc-service haproxy restart
