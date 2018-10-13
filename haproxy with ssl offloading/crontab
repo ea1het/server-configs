@@ -1,0 +1,11 @@
+# 
+# THIS IS A CRONTAB
+# In order to add this crontab to your system you must follow this steps:
+#
+# 1. Copy lines 10 and 11
+# 2. Type in your console "crontab -e" to edit a new crontab
+# 3. Paste the lines copied before at the end of the file and save
+#
+
+# min	hour	day	month	weekday	command
+0       0       1   *       *       root /usr/local/bin/update-certs.sh && rc-service haproxy restart
