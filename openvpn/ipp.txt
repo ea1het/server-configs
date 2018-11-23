@@ -1,0 +1,6 @@
+#
+# Fixed IP address assignment to remote clients
+#
+# <Common-Name>,<IP-address>
+#
+
