@@ -6,6 +6,7 @@
 # 2. Type in your console "crontab -e" to edit a new crontab
 # 3. Paste the lines copied before at the end of the file and save
 #
-
 # min	hour	day	month	weekday	command
-  0   0     1   *     *       root /usr/local/bin/update-certs.sh && rc-service haproxy restart
+
+# Letscrypt certificate renewal
+* 0 1 * * /usr/local/bin/update-certs.sh >/dev/null 2>&1
