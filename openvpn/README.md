@@ -1,12 +1,19 @@
 # Configuration bits
 
+### Certificate generation
+For this task, use easy-rsa. Once installed the package in the Linux/UNIX flavour of your choice (sorry, I don't support Windoze), continue with the following commands:
+
+- sudo ./easyrsa init-pki
+- sudo ./easyrsa build-ca
+- sudo ./easyrsa gen-dh
+- sudo ./easyrsa gen-req server nopass
+- sudo ./easyrsa sign-req server server
+- ./easyrsa gen-req client nopass
+- sudo ./easyrsa sign-req client client
+- cd /etc/openvpn
+- openvpn --genkey --secret pfs.key
+
 ### Enable IP Forwarding in SysCtl
-
-
-
-
-### Configuration in IPTables
-
 Configure IP Forwarding
 
     Option 1: Edit /etc/sysctl.conf and enable IP Forwarding by adding the following directive:
