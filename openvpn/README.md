@@ -33,7 +33,7 @@ Configure IP Forwarding
 
 
 
-## IF USING UFW (UnComplicated Firewall:
+## IF USING UFW (UnComplicated Firewall):
 ### First step is to configure the ufw rules
 This is done using the following ufw commands in the console:
 ```
