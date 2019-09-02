@@ -21,7 +21,7 @@ Configure IP Forwarding
     # sysctl –p net.ipv4.ip_forward 1
 
 
-Save Firewall Rules For iptables
+## IF USING IPTABLES: Save Firewall Rules For iptables
 
 - Configure overloading/masquerading
     ```
@@ -37,4 +37,15 @@ Save Firewall Rules For iptables
     ```
     rc-update add iptables 
     ```
+
+
+## IF USING UFW:
+```
+ufw limit udp 1194 0.0.0.0/0 any 0.0.0.0/0 in 
+ufw limit tcp 22 0.0.0.0/0 any <your_house_IP>
+
+ufw allow any any 0.0.0.0/0 any 0.0.0.0/0 out_tun0
+ufw allow any any 0.0.0.0/0 any 0.0.0.0/0 out_eth0
+ufw allow tcp 22 0.0.0.0/0 any 0.0.0.0/0 in_tun0 
+``` 
 
