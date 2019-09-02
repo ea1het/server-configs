@@ -1,7 +1,11 @@
 # Configuration bits
 
 ### Certificate generation
-For this task, use easy-rsa. Once installed the package in the Linux/UNIX flavour of your choice (sorry, I don't support Windoze), continue with the following commands:
+For this task, use easy-rsa. Package gets nornally installed in path /usr/share/easy-rsa. Move then onto /etc/opevpn and do a symlink:
+
+- ln -ns /usr/share/easy-rsa .
+
+Once installed the package in the Linux/UNIX flavour of your choice (sorry, I don't support Windoze), continue with the following commands from inside the already linked easy-rsa path inside /etc/openvpn (normally /etc/openvpn/easy-rsa):
 
 - sudo ./easyrsa init-pki
 - sudo ./easyrsa build-ca
