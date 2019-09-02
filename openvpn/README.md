@@ -41,11 +41,11 @@ Configure IP Forwarding
 
 ## IF USING UFW:
 ```
-ufw limit udp 1194 0.0.0.0/0 any 0.0.0.0/0 in 
-ufw limit tcp 22 0.0.0.0/0 any <your_house_IP>
+ufw allow out on tun0
+ufw allow out on eth0
 
-ufw allow any any 0.0.0.0/0 any 0.0.0.0/0 out_tun0
-ufw allow any any 0.0.0.0/0 any 0.0.0.0/0 out_eth0
-ufw allow tcp 22 0.0.0.0/0 any 0.0.0.0/0 in_tun0 
+ufw limit 1194/udp comment 'Rate limit for OpenVPN'
+ufw limit from <Your_Home_IP> to any port 22/tcp comment 'Rate limit for OpenSSH server'
+ufw allow in on tun0 to any port 22/tcp comment 'OpenSSH within VPN'
 ``` 
 
