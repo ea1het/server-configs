@@ -1,5 +1,9 @@
 # Configuration bits
 
+#
+# Interesting read: https://openvpn.net/community-resources/rsa-key-management/
+#
+
 ### Certificate generation
 For this task, use easy-rsa. Package gets nornally installed in path /usr/share/easy-rsa. Move then onto /etc/opevpn and do a symlink:
 
@@ -7,15 +11,24 @@ For this task, use easy-rsa. Package gets nornally installed in path /usr/share/
 
 Once installed the package in the Linux/UNIX flavour of your choice (sorry, I don't support Windoze), continue with the following commands from inside the already linked easy-rsa path inside /etc/openvpn (normally /etc/openvpn/easy-rsa):
 
+#### The CA
 - sudo ./easyrsa init-pki
-- sudo ./easyrsa build-ca
+- sudo ./easyrsa build-ca nopass
 - sudo ./easyrsa gen-dh
-- sudo ./easyrsa gen-req server nopass
-- sudo ./easyrsa sign-req server server
-- ./easyrsa gen-req client nopass
-- sudo ./easyrsa sign-req client client
+
+#### The server
+- sudo ./easyrsa gen-req ovpnserver nopass
+- sudo ./easyrsa sign-req server ovpnserver
+
+#### The client
+- sudo ./easyrsa gen-req user1 nopass
+- sudo ./easyrsa sign-req client user1
+
+#### Finally, the TLS auth key
 - cd /etc/openvpn
 - openvpn --genkey --secret pfs.key
+
+
 
 ### Enable IP Forwarding in SysCtl
 Configure IP Forwarding
