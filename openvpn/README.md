@@ -1,8 +1,7 @@
 # Configuration bits
-
-#
-# Interesting read: https://openvpn.net/community-resources/rsa-key-management/
-#
+####
+#### Interesting read: https://openvpn.net/community-resources/rsa-key-management/
+####
 
 ### Certificate generation
 For this task, use easy-rsa. Package gets nornally installed in path /usr/share/easy-rsa. Move then onto /etc/opevpn and do a symlink:
