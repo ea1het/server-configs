@@ -119,55 +119,64 @@ mv cert_export_CA.crt CA.crt
 Once you have completed all the above step you will have a fully functional OpenVPN server in your Mikrotik device. Now you need to configure a clien device (laptop, tablet or mobile phone) witha client configuration. Use the following for simplicity:
 
 ```
-#####################################################################
+######################################
 #
 # OPENVPN CLIENT CONFIGURATION FILE 
 #
-#####################################################################
+######################################
 
 client
 dev tun
 proto tcp
 remote vpn.remotesite.tld 1194
+
 nobind
 persist-key
 persist-tun
 verb 2
 pull
+
 reneg-sec 0
 key-direction 1
 cipher AES-256-CBC
 auth SHA1
+
 auth-retry none
 auth-nocache
 resolv-retry infinite
 # remote-cert-tls server
 # tls-client
 
-# CERTIFICATE DATA
+## CERTIFICATE AUTH DATA 
+## ONLY NEEDED FOR
 auth-user-pass user.auth
 
 
-#####################################################################
+######################################
 ##
 ## CLIENT CERTIFICATES IN-LINE MODE
 ##
-#####################################################################
+######################################
 
-## HERE COMES THE CA CERTIFICATE
+## HERE COMES...
+## THE CA CERTIFICATE
 <ca>
 ...
 </ca>
 
+## HERE COMES...
+## THE CLIENT CERTIFICATE
 <cert>
 ...
 </cert>
 
+## HERE COMES...
+## THE CLIENT CERTIFICATE PRIVATE KEY 
 <key>
 ...
 </key>
 
 ```
-
+At this point the VPN server is fully functional. Congratulations!
 
 _END_
