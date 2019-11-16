@@ -116,7 +116,7 @@ mv cert_export_CA.crt CA.crt
 ```
 
 ## OpenVPN client configuration
-Once you have completed all the above step you will have a fully functional OpenVPN server in your Mikrotik device. Now you need to configure a client device (laptop, tablet or mobile phone) with a client configuration. Use the following two files for simplicity:
+Once you have completed all the above steps you'd have a fully functional OpenVPN server in your Mikrotik device. Now you need to configure a client device (laptop, tablet or mobile phone) with a client configuration. Use the following two files for simplicity:
 
 ### File 1: user.auth
 ```
@@ -184,6 +184,6 @@ auth-user-pass user.auth
 </key>
 
 ```
-At this point the VPN server is fully functional. Congratulations!
+At this point the VPN server, with its client(s) is/are fully functional. Congratulations!
 
 _END_
