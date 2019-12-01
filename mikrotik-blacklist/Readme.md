@@ -94,15 +94,21 @@ now=$(date);
 echo "# Generated on $now" > $saveTo/dshield.rsc
 echo "/ip firewall address-list" >> $saveTo/dshield.rsc
 wget -q -O - http://feeds.dshield.org/block.txt \
-| awk --posix '/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.0\t/ { print "add list=blacklist address=" $1 "/24 comment=DShield";}' >> $saveTo/dshield.rsc
+| awk --posix '/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.0\t/ \
+{ print "add list=blacklist address=" $1 "/24 comment=DShield";}' \
+>> $saveTo/dshield.rsc
 
 echo "# Generated on $now" > $saveTo/spamhaus.rsc
 echo "/ip firewall address-list" >> $saveTo/spamhaus.rsc
 wget -q -O - http://www.spamhaus.org/drop/drop.lasso \
-| awk --posix '/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\// { print "add list=blacklist address=" $1 " comment=SpamHaus";}' >> $saveTo/spamhaus.rsc
+| awk --posix '/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\// \
+{ print "add list=blacklist address=" $1 " comment=SpamHaus";}' \
+>> $saveTo/spamhaus.rsc
 
 echo "# Generated on $now" > $saveTo/malc0de.rsc
 echo "/ip firewall address-list" >> $saveTo/malc0de.rsc
 wget -q -O - http://malc0de.com/bl/IP_Blacklist.txt \
-| awk --posix '/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/ { print "add list=blacklist address=" $1 " comment=malc0de";}' >> $saveTo/malc0de.rsc
+| awk --posix '/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/ \
+{ print "add list=blacklist address=" $1 " comment=malc0de";}' \
+>> $saveTo/malc0de.rsc
 ```
