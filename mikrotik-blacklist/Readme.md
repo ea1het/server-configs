@@ -80,3 +80,26 @@ The following is a modified excerpt of what was proposed by Joshaven Potter in h
 comment="Drop new connections which source is on a blacklist" \
 connection-state=new src-address-list=blacklist
 ```  
+
+# Optional: Using your own script generator
+This is the code that generates the Joshaven lists. Joshaven recommends using his domain for updates unless you are serious about running a highly available server. He says he'll take care of his servers so that we may freely benefit from this service. Furthermore he assres he's using global caching services to help distribute the load. We however are welcome to use the script below on our own.
+
+## Note on implementation
+Please only use the following update scripts sparingly because the source sites don’t need a bunch of unnecessary traffic. Anyway, the following script will run on a Linux server (requires gawk & wget). Place it in a file with 755 permissions into /etc/cron.daily/ folder to be run daily.
+
+``` 
+#!/bin/sh
+saveTo=/var/www
+now=$(date);
+echo "# Generated on $now" > $saveTo/dshield.rsc
+echo "/ip firewall address-list" >> $saveTo/dshield.rsc
+wget -q -O - http://feeds.dshield.org/block.txt | awk --posix '/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.0\t/ { print "add list=blacklist address=" $1 "/24 comment=DShield";}' >> $saveTo/dshield.rsc
+
+echo "# Generated on $now" > $saveTo/spamhaus.rsc
+echo "/ip firewall address-list" >> $saveTo/spamhaus.rsc
+wget -q -O - http://www.spamhaus.org/drop/drop.lasso | awk --posix '/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\// { print "add list=blacklist address=" $1 " comment=SpamHaus";}' >> $saveTo/spamhaus.rsc
+
+echo "# Generated on $now" > $saveTo/malc0de.rsc
+echo "/ip firewall address-list" >> $saveTo/malc0de.rsc
+wget -q -O - http://malc0de.com/bl/IP_Blacklist.txt | awk --posix '/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/ { print "add list=blacklist address=" $1 " comment=malc0de";}' >> $saveTo/malc0de.rsc
+```
