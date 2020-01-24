@@ -6,14 +6,14 @@ Once applied the below script in your Mikrotik box __ensure the Firewall>Filter 
 /ip ipsec profile set [ find default=yes ] dh-group=modp2048 enc-algorithm=aes-256 lifetime=30m
 /ip ipsec profile add dh-group=modp2048 enc-algorithm=aes-256 lifetime=30m name=ipsec-site2site
 
-/ip ipsec identity add comment="IPSec Site-to-Site" peer=ipsec-tunnel secret=PUT.HERE.YOUR.SUPER.DIFFCULT.SECRET
-
 /ip ipsec proposal set [ find default=yes ] enc-algorithms=aes-256-cbc pfs-group=modp2048
 /ip ipsec proposal add enc-algorithms=aes-256-cbc name=ipsec-site2site pfs-group=modp2048
 
-/ip ipsec peer add address=REMOTE.PUBLIC.IP.HERE local-address=LOCAL.PUBLIC.IP.HERE name=ipsec-tunnel profile=ipsec-site2site
+/ip ipsec peer add address=REMOTE.PUBLIC.IP.HERE local-address=LOCAL.PUBLIC.IP.HERE name=PEER.NAME.HERE profile=ipsec-site2site
 
-/ip ipsec policy add dst-address=REMOTE.CIDR-RANGE.HERE peer=ipsec-tunnel proposal=ipsec-site2site sa-dst-address=REMOTE.PUBLIC.IP.HERE sa-src-address=LOCAL.PUBLIC.IP.HERE src-address=LOCAL.CIDR-RANGE.HERE tunnel=yes
+/ip ipsec identity add comment="IPSec Site-to-Site" peer=PEER.NAME.HERE secret=PUT.HERE.YOUR.SUPER.DIFFCULT.SECRET
+
+/ip ipsec policy add dst-address=REMOTE.CIDR-RANGE.HERE peer=PEER.NAME.HERE proposal=ipsec-site2site sa-dst-address=REMOTE.PUBLIC.IP.HERE sa-src-address=LOCAL.PUBLIC.IP.HERE src-address=LOCAL.CIDR-RANGE.HERE tunnel=yes
 
 /ip firewall filter add action=accept chain=forward dst-address=LOCAL.CIDR-RANGE.HERE src-address=REMOTE.CIDR-RANGE.HERE
 
