@@ -16,12 +16,13 @@ Once applied the below script in your Mikrotik box __ensure the Firewall>Filter 
 /ip ipsec policy add dst-address=REMOTE.CIDR-RANGE.HERE peer=PEER.NAME.HERE proposal=ipsec-site2site sa-dst-address=REMOTE.PUBLIC.IP.HERE sa-src-address=LOCAL.PUBLIC.IP.HERE src-address=LOCAL.CIDR-RANGE.HERE tunnel=yes
 
 /ip firewall filter add action=accept chain=forward dst-address=LOCAL.CIDR-RANGE.HERE src-address=REMOTE.CIDR-RANGE.HERE
+/ip firewall filter add action=accept chain=forward dst-address=REMOTE.CIDR-RANGE.HERE src-address=LOCAL.CIDR-RANGE.HERE
 
 /ip firewall nat add action=accept chain=srcnat comment="IPSec Site-to-Site" dst-address=REMOTE.CIDR-RANGE.HERE src-address=LOCAL.CIDR-RANGE.HERE
 
-/system scheduler add comment="Comprobaci\F3n de IPs en las SAs de IPSec" interval=10m name=Tunel_IPSec on-event=Tunel_IPSec policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon start-time=startup
+/system scheduler add comment="Comprobaci\F3n de IPs en las SAs de IPSec" interval=10m name=Tunel_IPSec on-event=Tunnel_IPSec policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon start-time=startup
 
-/system script add dont-require-permissions=no name=Tunel_IPSec owner=admin policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon source=":log info \"Comprobacion IPSEC\"\r\
+/system script add dont-require-permissions=no name=Tunnel_IPSec owner=admin policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon source=":log info \"Comprobacion IPSEC\"\r\
     \n#\r\
     \n# Variables necesarias \r\
     \n#\r\
@@ -30,16 +31,16 @@ Once applied the below script in your Mikrotik box __ensure the Firewall>Filter 
     \n#\r\
     \n# Obtener valores actuales de las IPs en uso\r\
     \n#\r\
-    \n:global actualRemote [/ip ipsec peer get ipsec-tunnel address]\r\
+    \n:global actualRemote [/ip ipsec peer get PEER.NAME.HERE address]\r\
     \n:global actualRemote [:pick \$actualRemote 0 [:find \$actualRemote \"/\"]]\r\
-    \n:global actualLocal [/ip ipsec peer get ipsec-tunnel local-address]\r\
+    \n:global actualLocal [/ip ipsec peer get PEER.NAME.HERE local-address]\r\
     \n:delay 1s\r\
     \n#\r\
     \n# Cambiar la politica si la IP remota ha cambiado\r\
     \n#\r\
     \n:if (\$RemoteIP !=\$actualRemote)  do={\r\
     \n:log info \"Comprobando IP remota: IP actualizada. Nueva IP es \$RemoteIp\"\r\
-    \n/ip ipsec peer set ipsec-tunnel address=\$RemoteIP local-address=\$LocalIP\r\
+    \n/ip ipsec peer set PEER.NAME.HERE address=\$RemoteIP local-address=\$LocalIP\r\
     \n} else= {\r\
     \n:log info \"No hay cambios\"\r\
     \n}\r\
@@ -49,7 +50,7 @@ Once applied the below script in your Mikrotik box __ensure the Firewall>Filter 
     \n#\r\
     \n:if (\$LocalIP !=\$actualLocal) do={\r\
     \n:log info \"Comprobando la IP local: IP actualizada. Nueva IP es \$LocalIp\"\r\
-    \n/ip ipsec peer set ipsec-tunnel address=\$RemoteIP local-address=\$LocalIP\r\
+    \n/ip ipsec peer set PEER.NAME.HERE address=\$RemoteIP local-address=\$LocalIP\r\
     \n} else= {\r\
     \n:log info \"No hay cambios\"\r\
     \n}\r\
