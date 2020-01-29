@@ -20,20 +20,18 @@ key-usage=digital-signature,key-encipherment,tls-server
 
 /certificate sign server ca="CA" name="server"
 ``` 
+
+
 ### Client certificate(s)
 ```
-/certificate add name=client1 country="ES" state="AS" locality="ASTURIAS" organization="ACME" \
-unit="DevSecOps" common-name="client1" key-size=4096 days-valid=3650 key-usage=tls-client
+/certificate add name=ClientSimpleName country="ES" state="AS" locality="ASTURIAS" organization="ACME" \
+unit="DevSecOps" common-name="CNNameForCertificate" key-size=4096 days-valid=3650 key-usage=tls-client
 
-/certificate sign client1 ca="CA" name="client1"
+/certificate sign ClientSimpleName ca="CA" name="CNNameForCertificate"
 ``` 
 
 Steps to reproduce for many clients are essentially the same:
-```
-/certificate add name=client2 copy-from="client1" common-name="client2"
 
-/certificate sign client2 ca="CA" name="client2"
-``` 
 
 ### Certificate export
 Finally, the certificates generated are exported in the Mikrotik device, being stored in "/File" on the Mikrotik flash:
@@ -41,9 +39,8 @@ Finally, the certificates generated are exported in the Mikrotik device, being s
 ``` 
 /certificate export-certificate CA export-passphrase=""
 
-/certificate export-certificate client1 export-passphrase="password"
+/certificate export-certificate CNNameForCertificate export-passphrase="password"
 
-/certificate export-certificate client2 export-passphrase="password"
 ``` 
 
 
@@ -73,13 +70,11 @@ default-profile=open_vpn enabled=yes require-client-certificate=yes
 
 ## Client configuration stage **(on the Mikrotik)**
 ```
-/ppp secret add name=client1 password=password profile=open_vpn service=ovpn
+/ppp secret add name=CNNameForCertificate password=password profile=open_vpn service=ovpn
 ```
 
 As we have created two client certificates in the initial steps, we reproduce the above command again for the second client certificate. You can reproduce ths two steps as many times as OpenVPN clients you have. 
-```
-/ppp secret add name=client2 password=password profile=open_vpn service=ovpn
-```
+
 
 ## Routing & Firewall configuration stage (on the Mikrotik)
 ``` 
@@ -97,7 +92,7 @@ Certificates used on Mikrotik are generated with password (in order to enable ke
 ### Password removal from client keys
 For simplicity, only client1 will be illustrated. Nonetheless, this exact command can be used (or will be needed) for all the other client certificates. 
 ```
-openssl rsa -passin pass:password -in cert_export_client1.key -out client1.key
+openssl rsa -passin pass:password -in cert_export_CNNameForCertificate.key -out CNNameForCertificate.key
 ```
 
 Once done, you can delete the old key files:
@@ -107,7 +102,7 @@ rm -f cert_export_*.key
 
 Finally, and for easyness, we'll change certificate names:
 ```
-mv cert_export_client1.crt client1.crt
+mv cert_export_CNNameForCertificate.crt CNNameForCertificate.crt
 ```
 
 And here the CA name:
@@ -120,7 +115,7 @@ Once you have completed all the above steps you'd have a fully functional OpenVP
 
 ### File 1: user.auth
 ```
-client1
+CNNameForCertificate
 password
 ```
 
