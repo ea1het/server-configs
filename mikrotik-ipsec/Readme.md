@@ -44,7 +44,7 @@ Once applied the below script in your Mikrotik box __ensure the Firewall>Filter 
     \n} else= {\r\
     \n:log info \"No hay cambios\"\r\
     \n}\r\
-    \n:dealy 1s\r\
+    \n:delay 1s\r\
     \n#\r\
     \n# Cambiar la politica si la IP local ha cambiado\r\
     \n#\r\
