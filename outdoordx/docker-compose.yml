@@ -1,0 +1,195 @@
+services:
+  haproxy:
+    image: haproxy:3.1
+    container_name: outdoordx-haproxy
+    restart: unless-stopped
+    user: root
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /opt/outdoordx/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - /opt/outdoordx/certs:/usr/local/etc/haproxy/certs:ro
+      - haproxy-run:/var/run/haproxy
+    networks:
+      - internal
+    labels:
+      - autoheal=true
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'show info' | socat stdio /var/run/haproxy/admin.sock > /dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  redis:
+    image: redis/redis-stack-server:7.4.0-v8
+    container_name: outdoordx-redis
+    ports:
+      - "127.0.0.1:6379:6379"
+    restart: unless-stopped
+    command: ["redis-stack-server", "--save", "", "--appendonly", "no"]
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    labels:
+      - autoheal=true
+
+  aggregator:
+    image: ghcr.io/ea1het/outdoordx-agregator:v1.0.3
+    container_name: outdoordx-aggregator
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      APP_TYPE: worker
+      WORKER_MODE: loop
+      WORKER_LOOP_SLEEP: 5
+      SERVICE_NAME: outdoordx-aggregator
+      SERVICE_VERSION: 1.0.3
+      SERVICE_ENV: production
+      LOG_LEVEL: INFO
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PASSWORD: <redacted>
+      REDIS_MAX_CONN: 10
+      HTTP_TIMEOUT: 15
+      POTA_POLL_INTERVAL: 60
+      SOTA_POLL_INTERVAL: 60
+      WWFF_POLL_INTERVAL: 120
+      WWBOTA_POLL_INTERVAL: 120
+    networks:
+      - internal
+
+  bff:
+    image: ghcr.io/ea1het/outdoordx-bff:v1.1.8
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      APP_TYPE: api
+      SERVICE_NAME: outdoordx-bff
+      SERVICE_VERSION: 1.1.8
+      SERVICE_NAMESPACE: default
+      SERVICE_ENV: production
+      LOG_LEVEL: DEBUG
+      REDIS_ENABLED: "true"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PASSWORD: <redacted>
+      REDIS_MAX_CONN: 20
+      HTTP_PORT: 9000
+      SSE_HEARTBEAT_SECONDS: 30
+      ALLOWED_ORIGIN: https://outdoordx.com
+    labels:
+      - autoheal=true
+    healthcheck:
+      # test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health')"]
+      # test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    expose:
+      - "9000"
+    networks:
+      - internal
+
+  hamalert:
+    image: ghcr.io/ea1het/outdoordx-hamalert:v1.0.1
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      APP_TYPE: api
+      API_PORT: 9000
+      GUNICORN_APP: outdoordx_hamalert.app:app
+      GUNICORN_WORKERS: 2
+      GUNICORN_TIMEOUT: 0
+      GUNICORN_WORKER_CLASS: sync
+      GUNICORN_WORKER_CONNECTIONS: 1000
+      GUNICORN_KEEPALIVE: 30
+      SERVICE_NAME: outdoordx-api
+      SERVICE_VERSION: 1.0.1
+      SERVICE_ENV: production
+      LOG_LEVEL: INFO
+      REDIS_ENABLED: "true"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PASSWORD: <redacted>
+      REDIS_MAX_CONN: 20
+      HAMALERT_TTL_SECONDS: 3600
+      RATELIMIT_DEFAULT: 60 per minute
+    labels:
+      - autoheal=true
+    healthcheck:
+      # test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/health')"]
+      # test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    expose:
+      - "9000"
+    networks:
+      - internal
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: outdoordx-autoheal
+    restart: unless-stopped
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_INTERVAL: 10
+      AUTOHEAL_START_PERIOD: 60
+      AUTOHEAL_DEFAULT_STOP_TIMEOUT: 10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - internal
+
+  # Inactive by default. Run explicitly with:
+  #   docker compose --profile certbot up letsencrypt
+  letsencrypt:
+    image: goacme/lego:latest
+    container_name: outdoordx-letsencrypt
+    profiles:
+      - certbot
+    env_file:
+      - /opt/outdoordx/hetzner/token.env
+    volumes:
+      - /opt/outdoordx/letsencrypt:/letsencrypt
+    command:
+      # - --server
+      # - https://acme-staging-v02.api.letsencrypt.org/directory
+      - --email
+      - ${LE_EMAIL}
+      - --dns
+      - hetzner
+      - --domains
+      - ${DOMAIN}
+      - --domains
+      - "*.${DOMAIN}"
+      - --path
+      - /letsencrypt
+      - --accept-tos
+      - run
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  haproxy-run:
